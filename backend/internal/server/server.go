@@ -1,7 +1,9 @@
 package server
 
 import (
+	"helpdesk/backend/internal/auth"
 	"helpdesk/backend/internal/config"
+	"helpdesk/backend/internal/server/handler"
 	"net/http"
 	"time"
 
@@ -23,7 +25,8 @@ func New(cfg *config.Config, db *gorm.DB) *http.Server {
 	}))
 
 	api := humagin.New(r, huma.DefaultConfig("Helpdesk API", "1.0.0"))
-	registerRoutes(api, db)
+	registerRoutes(api, db, auth.NewJWT(cfg.JWTSecret, cfg.JWTTTL),
+		handler.CookieConfig{Secure: cfg.CookieSecure, TTL: cfg.JWTTTL})
 
 	return &http.Server{
 		Addr:              ":" + cfg.Port,
