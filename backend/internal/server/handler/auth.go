@@ -5,6 +5,7 @@ import (
 	"errors"
 	"helpdesk/backend/internal/auth"
 	"helpdesk/backend/internal/database/models"
+	"helpdesk/backend/internal/server/middleware"
 	"helpdesk/backend/internal/service"
 	"net/http"
 	"time"
@@ -112,4 +113,21 @@ type LogoutOutput struct {
 
 func (h *AuthHandler) Logout(ctx context.Context, _ *struct{}) (*LogoutOutput, error) {
 	return &LogoutOutput{SetCookie: h.sessionCookie("", -1)}, nil
+}
+
+type MeOutput struct{ Body UserBody }
+
+func (h *AuthHandler) Me(ctx context.Context, _ *struct{}) (*MeOutput, error) {
+	p, ok := middleware.PrincipalFrom(ctx)
+	if !ok {
+		return nil, huma.Error401Unauthorized("authentication required")
+	}
+	u, err := h.svc.GetUser(ctx, p.UserID)
+	switch {
+	case errors.Is(err, service.ErrUserNotFound):
+		return nil, huma.Error401Unauthorized("user no longer exists")
+	case err != nil:
+		return nil, err
+	}
+	return &MeOutput{Body: toUserBody(u)}, nil
 }

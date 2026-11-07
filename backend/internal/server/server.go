@@ -24,7 +24,11 @@ func New(cfg *config.Config, db *gorm.DB) *http.Server {
 		MaxAge:       12 * time.Hour,
 	}))
 
-	api := humagin.New(r, huma.DefaultConfig("Helpdesk API", "1.0.0"))
+	apiCfg := huma.DefaultConfig("Helpdesk API", "1.0.0")
+	apiCfg.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+		"bearer": {Type: "http", Scheme: "bearer", BearerFormat: "JWT"},
+	}
+	api := humagin.New(r, apiCfg)
 	registerRoutes(api, db, auth.NewJWT(cfg.JWTSecret, cfg.JWTTTL),
 		handler.CookieConfig{Secure: cfg.CookieSecure, TTL: cfg.JWTTTL})
 
