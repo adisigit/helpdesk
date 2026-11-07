@@ -14,10 +14,14 @@ import (
 
 func registerRoutes(api huma.API, db *gorm.DB, jwt *auth.JWT, ck handler.CookieConfig) {
 	userRepo := repository.NewUserRepository(db)
+	ticketRepo := repository.NewticketReporitory(db)
+
 	authH := handler.NewAuthHandler(service.NewAuthService(userRepo, jwt), ck)
+	ticketH := handler.NewTicketHandler(service.NewTicketService(ticketRepo, userRepo))
 
 	protected := router.ProtectedGroup(api, middleware.Auth(api, jwt))
 
 	router.RegisterHealth(api)
 	router.RegisterAuth(api, protected, authH)
+	router.RegisterTickets(protected, ticketH)
 }
