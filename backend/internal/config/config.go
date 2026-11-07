@@ -17,6 +17,7 @@ type Config struct {
 	CORSOrigins    []string
 	SeedOnStart    bool
 	SeedPassword   string
+	CookieSecure   bool
 }
 
 func Load() (*Config, error) {
@@ -34,6 +35,7 @@ func Load() (*Config, error) {
 		CORSOrigins:    splitCSV(getenv("CORS_ORIGINS", "http://localhost:5173")),
 		SeedOnStart:    getenv("SEED_ON_START", "false") == "true",
 		SeedPassword:   os.Getenv("SEED_PASSWORD"),
+		CookieSecure:   getenv("COOKIE_SECURE", "false") == "true",
 	}
 
 	if c.DatabaseURL == "" {
