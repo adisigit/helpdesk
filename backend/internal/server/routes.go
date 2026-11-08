@@ -15,13 +15,18 @@ import (
 func registerRoutes(api huma.API, db *gorm.DB, jwt *auth.JWT, ck handler.CookieConfig) {
 	userRepo := repository.NewUserRepository(db)
 	ticketRepo := repository.NewticketReporitory(db)
+	commentRepo := repository.NewCommentRepository(db)
+
+	commentSvc := service.NewCommentService(ticketRepo, commentRepo)
 
 	authH := handler.NewAuthHandler(service.NewAuthService(userRepo, jwt), ck)
-	ticketH := handler.NewTicketHandler(service.NewTicketService(ticketRepo, userRepo))
+	ticketH := handler.NewTicketHandler(service.NewTicketService(ticketRepo, userRepo), commentSvc)
+	commentH := handler.NewCommentHandler(commentSvc)
 
 	protected := router.ProtectedGroup(api, middleware.Auth(api, jwt))
 
 	router.RegisterHealth(api)
 	router.RegisterAuth(api, protected, authH)
 	router.RegisterTickets(protected, ticketH)
+	router.RegisterComments(protected, commentH)
 }

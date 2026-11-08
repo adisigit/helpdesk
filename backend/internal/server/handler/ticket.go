@@ -13,10 +13,16 @@ import (
 	"github.com/google/uuid"
 )
 
-type TicketHandler struct{ svc *service.TicketService }
+type TicketHandler struct {
+	svc      *service.TicketService
+	comments *service.CommentService
+}
 
-func NewTicketHandler(svc *service.TicketService) *TicketHandler {
-	return &TicketHandler{svc: svc}
+func NewTicketHandler(svc *service.TicketService, comments *service.CommentService) *TicketHandler {
+	return &TicketHandler{
+		svc:      svc,
+		comments: comments,
+	}
 }
 
 func actorFrom(ctx context.Context) (service.Actor, error) {
@@ -44,7 +50,8 @@ func mapTicketErr(err error) error {
 	case errors.Is(err, domain.ErrInvalidTransition),
 		errors.Is(err, service.ErrInvalidAssignee),
 		errors.Is(err, service.ErrInvalidFilter),
-		errors.Is(err, service.ErrInvalidInput):
+		errors.Is(err, service.ErrInvalidInput),
+		errors.Is(err, service.ErrEmptyComment):
 		return huma.Error422UnprocessableEntity(err.Error())
 	case errors.Is(err, service.ErrNothingToUpdate):
 		return huma.Error400BadRequest(err.Error())
@@ -125,7 +132,14 @@ type GetTicketInput struct {
 	ID string `path:"id" format:"uuid"`
 }
 
-func (h *TicketHandler) Get(ctx context.Context, in *GetTicketInput) (*TicketOutput, error) {
+type TicketDetailBody struct {
+	TicketBody
+	Comments []CommentBody `json:"comments" doc:"Requester tidak menerima catatan internal"`
+}
+
+type TicketDetailOutput struct{ Body TicketDetailBody }
+
+func (h *TicketHandler) Get(ctx context.Context, in *GetTicketInput) (*TicketDetailOutput, error) {
 	actor, err := actorFrom(ctx)
 	if err != nil {
 		return nil, err
@@ -134,11 +148,18 @@ func (h *TicketHandler) Get(ctx context.Context, in *GetTicketInput) (*TicketOut
 	if err != nil {
 		return nil, err
 	}
-	t, err := h.svc.Get(ctx, actor, id)
+	t, err := h.svc.Get(ctx, actor, id) // pemeriksaan akses
 	if err != nil {
 		return nil, mapTicketErr(err)
 	}
-	return &TicketOutput{Body: toTicketBody(t, actor)}, nil
+	cs, err := h.comments.ListFor(ctx, actor, t.ID)
+	if err != nil {
+		return nil, err
+	}
+	out := &TicketDetailOutput{}
+	out.Body.TicketBody = toTicketBody(t, actor)
+	out.Body.Comments = toCommentBodies(cs)
+	return out, nil
 }
 
 type ListTicketsInput struct {
