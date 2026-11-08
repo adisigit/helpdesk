@@ -6,4 +6,5 @@ var (
 	ErrNotFound  = errors.New("record not found")
 	ErrDuplicate = errors.New("record already exists")
 	ErrConflict  = errors.New("record was modified concurrently")
+	ErrLastAdmin = errors.New("cannot remove the last admin")
 )
