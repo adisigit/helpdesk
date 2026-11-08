@@ -46,6 +46,20 @@ func (f *fakeUsers) FindByID(_ context.Context, id uuid.UUID) (*models.User, err
 	return nil, repository.ErrNotFound
 }
 
+func (f *fakeUsers) List(_ context.Context, _ repository.UserFilter) ([]models.User, int64, error) {
+	return nil, 0, nil
+}
+
+func (f *fakeUsers) SetRole(_ context.Context, id uuid.UUID, role models.Role) (*models.User, error) {
+	for _, u := range f.byEmail {
+		if u.ID == id {
+			u.Role = role
+			return u, nil
+		}
+	}
+	return nil, repository.ErrNotFound
+}
+
 func newSvc() (*AuthService, *auth.JWT) {
 	j := auth.NewJWT("0123456789abcdef-secret", time.Hour)
 	return NewAuthService(newFakeUsers(), j), j
