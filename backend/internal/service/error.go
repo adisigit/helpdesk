@@ -15,4 +15,8 @@ var (
 	ErrInvalidAssignee = errors.New("assignee must be an existing agent or admin")
 	ErrNothingToUpdate = errors.New("no fields to update")
 	ErrConflict        = errors.New("ticket was modified by someone else, please reload")
+
+	ErrEmptyComment = errors.New("comment body must not be blank")
+	ErrInvalidRole  = errors.New("invalid role")
+	ErrLastAdmin    = errors.New("cannot remove the last admin")
 )
