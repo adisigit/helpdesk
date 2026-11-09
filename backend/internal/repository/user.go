@@ -16,6 +16,7 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	List(ctx context.Context, f UserFilter) ([]models.User, int64, error)
 	SetRole(ctx context.Context, id uuid.UUID, role models.Role) (*models.User, error)
+	ListStaff(ctx context.Context) ([]models.User, error)
 }
 
 type userRepo struct {
@@ -108,4 +109,13 @@ func (r *userRepo) SetRole(ctx context.Context, id uuid.UUID, role models.Role) 
 		return nil, err
 	}
 	return &out, nil
+}
+
+func (r *userRepo) ListStaff(ctx context.Context) ([]models.User, error) {
+	var out []models.User
+	err := r.db.WithContext(ctx).
+		Where("role IN ?", []string{string(models.RoleAgent), string(models.RoleAdmin)}).
+		Order("name ASC, id ASC").
+		Find(&out).Error
+	return out, err
 }

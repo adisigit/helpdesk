@@ -167,6 +167,14 @@ func (s *TicketService) Update(ctx context.Context, actor Actor, id uuid.UUID, i
 	}
 
 	if in.AssigneeID != nil {
+		if actor.Role == models.RoleAgent {
+			if *in.AssigneeID != actor.ID {
+				return nil, ErrForbidden
+			}
+			if t.AssigneeID != nil && *t.AssigneeID != actor.ID {
+				return nil, ErrForbidden
+			}
+		}
 		a, err := s.users.FindByID(ctx, *in.AssigneeID)
 		if errors.Is(err, repository.ErrNotFound) {
 			return nil, ErrInvalidAssignee

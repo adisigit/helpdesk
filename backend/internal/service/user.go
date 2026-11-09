@@ -68,3 +68,7 @@ func (s *UserService) ChangeRole(ctx context.Context, id uuid.UUID, role models.
 	}
 	return u, nil
 }
+
+func (s *UserService) ListStaff(ctx context.Context) ([]models.User, error) {
+	return s.users.ListStaff(ctx)
+}
