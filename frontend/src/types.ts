@@ -43,3 +43,32 @@ export interface RegisterPayload {
   email: string
   password: string
 }
+
+export interface TicketComment {
+  id: string
+  author: User
+  body: string
+  is_internal: boolean
+  created_at: string
+}
+
+export interface TicketDetail extends Ticket {
+  comments: TicketComment[]
+}
+
+export interface AdminUser extends User {
+  created_at: string
+}
+
+export interface CreateTicketPayload {
+  title: string
+  description: string
+  category: string
+  priority: Priority
+}
+
+export interface UpdateTicketPayload {
+  status?: TicketStatus
+  priority?: Priority
+  assignee_id?: string
+}
