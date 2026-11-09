@@ -5,6 +5,8 @@ import StatusPageView from "../views/StatusPageView.vue"
 import LoginView from "../views/LoginView.vue"
 import RegisterView from "../views/RegisterView.vue"
 import TicketListView from "../views/TicketListView.vue"
+import TicketCreateView from "../views/TicketCreateView.vue"
+import TicketDetailView from "../views/TicketDetailView.vue"
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -32,6 +34,19 @@ const routes: RouteRecordRaw[] = [
     path: '/tickets',
     name: 'tickets',
     component: () => TicketListView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/tickets/new',
+    name: 'ticket-new',
+    component: () => TicketCreateView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/tickets/:id',
+    name: 'ticket-detail',
+    component: () => TicketDetailView,
+    props: true,
     meta: { requiresAuth: true },
   },
   {
