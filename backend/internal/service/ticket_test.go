@@ -213,15 +213,35 @@ func TestUpdate_AssigneeMustBeStaff(t *testing.T) {
 	tk := e.newTicket(t)
 	ctx := context.Background()
 
-	_, err := e.svc.Update(ctx, e.agent, tk.ID, UpdateTicketInput{AssigneeID: &e.other.ID})
+	_, err := e.svc.Update(ctx, e.admin, tk.ID, UpdateTicketInput{AssigneeID: &e.other.ID})
 	assert.ErrorIs(t, err, ErrInvalidAssignee, "requester tidak boleh jadi assignee")
 
-	_, err = e.svc.Update(ctx, e.agent, tk.ID, UpdateTicketInput{AssigneeID: ptr(uuid.New())})
+	_, err = e.svc.Update(ctx, e.admin, tk.ID, UpdateTicketInput{AssigneeID: ptr(uuid.New())})
 	assert.ErrorIs(t, err, ErrInvalidAssignee, "user tidak ada")
 
-	got, err := e.svc.Update(ctx, e.agent, tk.ID, UpdateTicketInput{AssigneeID: &e.admin.ID})
+	got, err := e.svc.Update(ctx, e.admin, tk.ID, UpdateTicketInput{AssigneeID: &e.agent.ID})
+	require.NoError(t, err)
+	assert.Equal(t, e.agent.ID, *got.AssigneeID)
+}
+
+func TestUpdate_AgentCanOnlyTakeTicketForSelf(t *testing.T) {
+	e := newTicketEnv(t)
+	tk := e.newTicket(t)
+	ctx := context.Background()
+
+	_, err := e.svc.Update(ctx, e.agent, tk.ID, UpdateTicketInput{AssigneeID: &e.admin.ID})
+	assert.ErrorIs(t, err, ErrForbidden, "agent tidak boleh menugaskan orang lain")
+
+	got, err := e.svc.Update(ctx, e.agent, tk.ID, UpdateTicketInput{AssigneeID: &e.agent.ID})
+	require.NoError(t, err)
+	assert.Equal(t, e.agent.ID, *got.AssigneeID)
+
+	got, err = e.svc.Update(ctx, e.admin, tk.ID, UpdateTicketInput{AssigneeID: &e.admin.ID})
 	require.NoError(t, err)
 	assert.Equal(t, e.admin.ID, *got.AssigneeID)
+
+	_, err = e.svc.Update(ctx, e.agent, tk.ID, UpdateTicketInput{AssigneeID: &e.agent.ID})
+	assert.ErrorIs(t, err, ErrForbidden)
 }
 
 func TestUpdate_EmptyPatchIsRejected(t *testing.T) {

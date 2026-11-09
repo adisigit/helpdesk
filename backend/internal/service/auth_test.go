@@ -60,6 +60,8 @@ func (f *fakeUsers) SetRole(_ context.Context, id uuid.UUID, role models.Role) (
 	return nil, repository.ErrNotFound
 }
 
+func (f *fakeUsers) ListStaff(_ context.Context) ([]models.User, error) { return nil, nil }
+
 func newSvc() (*AuthService, *auth.JWT) {
 	j := auth.NewJWT("0123456789abcdef-secret", time.Hour)
 	return NewAuthService(newFakeUsers(), j), j

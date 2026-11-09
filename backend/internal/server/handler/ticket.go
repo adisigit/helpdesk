@@ -148,7 +148,7 @@ func (h *TicketHandler) Get(ctx context.Context, in *GetTicketInput) (*TicketDet
 	if err != nil {
 		return nil, err
 	}
-	t, err := h.svc.Get(ctx, actor, id) // pemeriksaan akses
+	t, err := h.svc.Get(ctx, actor, id)
 	if err != nil {
 		return nil, mapTicketErr(err)
 	}

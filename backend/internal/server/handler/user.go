@@ -91,3 +91,22 @@ func (h *UserHandler) ChangeRole(ctx context.Context, in *ChangeRoleInput) (*Use
 	}
 	return &UserOutput{Body: toAdminUserBody(u)}, nil
 }
+
+type AssigneesOutput struct {
+	Body struct {
+		Items []UserBody `json:"items"`
+	}
+}
+
+func (h *UserHandler) ListAssignees(ctx context.Context, _ *struct{}) (*AssigneesOutput, error) {
+	us, err := h.svc.ListStaff(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := &AssigneesOutput{}
+	out.Body.Items = make([]UserBody, 0, len(us))
+	for i := range us {
+		out.Body.Items = append(out.Body.Items, toUserBody(&us[i]))
+	}
+	return out, nil
+}
