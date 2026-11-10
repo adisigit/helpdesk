@@ -7,6 +7,7 @@ import RegisterView from "../views/RegisterView.vue"
 import TicketListView from "../views/TicketListView.vue"
 import TicketCreateView from "../views/TicketCreateView.vue"
 import TicketDetailView from "../views/TicketDetailView.vue"
+import AdminUsersView from "../views/AdminUsersView.vue"
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -48,6 +49,12 @@ const routes: RouteRecordRaw[] = [
     component: () => TicketDetailView,
     props: true,
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/admin/users',
+    name: 'admin-users',
+    component: () => AdminUsersView,
+    meta: { requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/forbidden',

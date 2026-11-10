@@ -1,4 +1,4 @@
-import type { Priority, TicketStatus } from "./types"
+import type { Priority, Role, TicketStatus } from "./types"
 
 interface Badge {
   label: string
@@ -29,4 +29,10 @@ export const CATEGORIES = [
 
 export function toOptions<K extends string>(map: Record<K, { label: string }>): { value: K; label: string }[] {
   return (Object.entries(map) as [K, { label: string }][]).map(([value, v]) => ({ value, label: v.label }))
+}
+
+export const ROLES: Record<Role, { label: string }> = {
+  requester: { label: 'Requester' },
+  agent: { label: 'Agent' },
+  admin: { label: 'Admin' },
 }
